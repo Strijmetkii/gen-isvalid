@@ -21,6 +21,8 @@ type Generator struct {
 	OutputFile string
 	// PackageName is the name of the package for the generated code
 	PackageName string
+	// Force indicates whether to force regeneration even if output file exists
+	Force bool
 }
 
 // StructInfo contains information about a struct for which validation code will be generated
@@ -61,6 +63,15 @@ func NewGenerator(inputFile string) *Generator {
 
 // Generate parses the input file and generates the validation code
 func (g *Generator) Generate() error {
+	// Check if output file already exists and Force is not set
+	if !g.Force {
+		if _, err := os.Stat(g.OutputFile); err == nil {
+			// File exists, skip generation
+			fmt.Printf("Output file %s already exists, skipping generation\n", g.OutputFile)
+			return nil
+		}
+	}
+
 	// Parse the input file
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, g.InputFile, nil, parser.ParseComments)

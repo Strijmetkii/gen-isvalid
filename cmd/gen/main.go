@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/stijmetkii/validation-gen/validation"
+	"github.com/strijmetkii/gen-isvalid/validation"
 )
 
 func main() {
@@ -19,6 +19,7 @@ func main() {
 	// Parse flags
 	inputFile := flag.String("input", defaultInput, "Path to the input Go file")
 	outputFile := flag.String("output", "", "Path to the output Go file (default is <input>_gen.go)")
+	forceFlag := flag.Bool("force", false, "Force regeneration even if output file exists")
 	flag.Parse()
 
 	// If the output file is not specified, derive it from the input file
@@ -35,6 +36,9 @@ func main() {
 	if *outputFile != "" {
 		generator.OutputFile = *outputFile
 	}
+
+	// Set force flag
+	generator.Force = *forceFlag
 
 	if err := generator.Generate(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
