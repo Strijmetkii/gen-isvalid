@@ -225,3 +225,105 @@ type Config struct {}
 		t.Errorf("Generated code doesn't validate pointer fields in generics")
 	}
 }
+
+func TestForceFlag(t *testing.T) {
+	// Create a temporary test file
+	dir := t.TempDir()
+	testFile := filepath.Join(dir, "test_force.go")
+
+	// Create test content
+	content := `package test
+
+// TestService is a test service
+//go:generate go run ../cmd/gen/main.go
+type TestService struct {
+	Client *Client
+}
+
+// Client is a test client
+type Client struct {}
+`
+
+	// Write test content to file
+	err := os.WriteFile(testFile, []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	// Create generator
+	generator := NewGenerator(testFile)
+
+	// Generate code first time
+	err = generator.Generate()
+	if err != nil {
+		t.Fatalf("Failed to generate code: %v", err)
+	}
+
+	// Read the generated file
+	firstGen, err := os.ReadFile(generator.OutputFile)
+	if err != nil {
+		t.Fatalf("Failed to read generated code: %v", err)
+	}
+
+	// Modify the source file
+	modifiedContent := `package test
+
+// TestService is a test service with modified fields
+//go:generate go run ../cmd/gen/main.go
+type TestService struct {
+	Client *Client
+	Logger *Logger
+}
+
+// Client is a test client
+type Client struct {}
+
+// Logger is a test logger
+type Logger struct {}
+`
+
+	err = os.WriteFile(testFile, []byte(modifiedContent), 0o644)
+	if err != nil {
+		t.Fatalf("Failed to write modified test file: %v", err)
+	}
+
+	// Try to generate again without Force flag
+	err = generator.Generate()
+	if err != nil {
+		t.Fatalf("Failed on second generation: %v", err)
+	}
+
+	// Read the file again, it should be unchanged
+	secondGen, err := os.ReadFile(generator.OutputFile)
+	if err != nil {
+		t.Fatalf("Failed to read generated code after second run: %v", err)
+	}
+
+	// Content should be the same as before
+	if string(firstGen) != string(secondGen) {
+		t.Errorf("Generated file was modified when Force was false")
+	}
+
+	// Now set Force flag and generate again
+	generator.Force = true
+	err = generator.Generate()
+	if err != nil {
+		t.Fatalf("Failed on third generation with Force flag: %v", err)
+	}
+
+	// Read the file again, it should be changed
+	thirdGen, err := os.ReadFile(generator.OutputFile)
+	if err != nil {
+		t.Fatalf("Failed to read generated code after third run: %v", err)
+	}
+
+	// Content should be different now
+	if string(firstGen) == string(thirdGen) {
+		t.Errorf("Generated file was not modified when Force was true")
+	}
+
+	// Check that the new field is in the generated code
+	if !strings.Contains(string(thirdGen), "Logger *Logger") {
+		t.Errorf("Generated code doesn't contain the new field")
+	}
+}
