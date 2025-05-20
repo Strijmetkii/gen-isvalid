@@ -2,7 +2,7 @@ package example
 
 // ExampleService is a service for interacting with the example API
 //
-//go:generate go run github.com/stijmetkii/validation-gen/cmd/gen
+//go:generate go run github.com/strijmetkii/gen-isvalid/cmd/gen
 type ExampleService struct {
 	Client *Client
 	Cfg    *Config
@@ -10,7 +10,7 @@ type ExampleService struct {
 
 // AnotherService is another example service
 //
-//go:generate go run github.com/strijmetkii/validation-gen/cmd/gen
+//go:generate go run github.com/strijmetkii/gen-isvalid/cmd/gen
 type AnotherService struct {
 	Logger  Logger
 	Options Options

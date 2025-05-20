@@ -4,7 +4,7 @@ import "context"
 
 // GenericService is a service that works with a generic type
 //
-//go:generate go run github.com/stijmetkii/validation-gen/cmd/gen
+//go:generate go run github.com/strijmetkii/gen-isvalid/cmd/gen
 type GenericService[T any] struct {
 	Repository Repository[T]
 	Logger     Logger
@@ -27,7 +27,7 @@ type GenericOptions struct {
 
 // CacheService uses both generics and interfaces
 //
-//go:generate go run github.com/stijmetkii/validation-gen/cmd/gen
+//go:generate go run github.com/strijmetkii/gen-isvalid/cmd/gen
 type CacheService[K comparable, V any] struct {
 	Store      KeyValueStore[K, V]
 	Serializer Serializer[V]
@@ -50,7 +50,7 @@ type Serializer[T any] interface {
 
 // EventProcessor processes events with constraints on the generic type
 //
-//go:generate go run github.com/stijmetkii/validation-gen/cmd/gen
+//go:generate go run github.com/strijmetkii/gen-isvalid/cmd/gen
 type EventProcessor[E Event] struct {
 	Handler    EventHandler[E]
 	Queue      *EventQueue[E]
